@@ -1,0 +1,10 @@
+com\mobile\testing\base\baseMethods.class
+pages\AmazonLoginPage.class
+pages\AmazonHomePage.class
+com\mobile\testing\base\ConfigFileReader.class
+pages\AmazonDeliveryPage.class
+com\mobile\testing\base\BasePage.class
+pages\AmazonSearchItemPage.class
+pages\AmazonAddressPage.class
+Listeners\TestAllureListener.class
+pages\AmazonMenuPage.class

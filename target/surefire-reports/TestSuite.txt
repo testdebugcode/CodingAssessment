@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+Test set: TestSuite
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 97.11 s <<< FAILURE! - in TestSuite
+com.mobile.testing.AmazonShopping.amazonOrder  Time elapsed: 64.916 s  <<< FAILURE!
+java.lang.AssertionError: 
+The following asserts failed:
+	expected [₹13,499.00 ₹26,990.00] but found [₹13,499.00]
+	at com.mobile.testing.AmazonShopping.amazonOrder(AmazonShopping.java:94)
+
