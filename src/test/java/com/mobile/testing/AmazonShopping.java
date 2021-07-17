@@ -20,6 +20,7 @@ import pages.AmazonSearchItemPage;
 
 
 public class AmazonShopping extends BasePage{
+	
 	AmazonLoginPage login;
 	AmazonHomePage home;
 	AmazonSearchItemPage item;
@@ -33,11 +34,11 @@ public class AmazonShopping extends BasePage{
 	String url =ConfigFileReader.properties.getProperty("URL");
 	SoftAssert softAssert;	
 
-
 	
 	@BeforeMethod
+	
 	public void initDriver() throws IOException
-	{		
+	{	
 		launchApp(url);
 		login= new AmazonLoginPage(driver);
 		home = new AmazonHomePage(driver);
@@ -51,7 +52,8 @@ public class AmazonShopping extends BasePage{
 	@Test
 	@Severity(SeverityLevel.NORMAL)
 	@Description("Amazon Order Product")
-	@Story("Story Name: Validatng Price and Description") 
+	@Story("Story Name: Validatng Price and Description")
+	
 	public void amazonOrder() throws IOException, InterruptedException {
 
 		login.clickSignIn();
@@ -96,10 +98,10 @@ public class AmazonShopping extends BasePage{
 	}
 	
 	
-	
 	@AfterMethod	
 	public void tearDown()
 	{
+		
 		captureLogcat();
 		//captureAppiumLogs();
 		driver.quit();
