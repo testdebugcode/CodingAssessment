@@ -1,12 +1,9 @@
 package pages;
 
 import java.io.IOException;
-
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
-
 import com.mobile.testing.base.BasePage;
-
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.nativekey.AndroidKey;
@@ -38,8 +35,5 @@ public class AmazonHomePage extends BasePage{
 		driver.getKeyboard().sendKeys(Keys.RETURN);
 		return this;
 	}
-	
-	
-	
 
 }
