@@ -1,9 +1,7 @@
 package pages;
 
 import com.mobile.testing.base.BasePage;
-
 import javax.sound.midi.SysexMessage;
-
 import org.openqa.selenium.WebElement;
 import io.appium.java_client.android.AndroidDriver;
 import io.qameta.allure.Step;
