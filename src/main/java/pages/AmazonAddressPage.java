@@ -67,5 +67,4 @@ public class AmazonAddressPage extends BasePage {
 		return this;
 	}
 	
-	
 }
