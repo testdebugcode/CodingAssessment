@@ -8,7 +8,7 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.qameta.allure.Step;
 
-/**
+/*
  * Page contains Login functionality
  * Each method has locator and locator values
  */
