@@ -7,6 +7,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -26,10 +27,13 @@ import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-
-import io.appium.java_client.android.AndroidDriver;;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.service.local.AppiumDriverLocalService;
+import io.appium.java_client.service.local.AppiumServiceBuilder;
+import jdk.internal.org.jline.utils.Log;
 
 /*
  *Author : Manimekalai
@@ -38,16 +42,21 @@ import io.appium.java_client.android.AndroidDriver;;
 
 public class BasePage implements baseMethods {
 
-	public static AndroidDriver driver;	
-	public static int WAIT_MILLIS_100 =100;
+	public static AndroidDriver driver;
+	public static int WAIT_MILLIS_100 = 100;
 	int i;
-	public static int WAIT_MILLIS_500= 500;
+	public static int WAIT_MILLIS_500 = 500;
 	public static ThreadLocal<AndroidDriver> tdriver = new ThreadLocal<AndroidDriver>();
+	private static AppiumDriverLocalService server;
 
-	/* Method contains to pass values for these parameters appPackage,platformName,appActvity,automationName
-	 * Method got failed take screenshot using takesnap() method
+	/*
+	 * Method contains to pass values for these parameters
+	 * appPackage,platformName,appActvity,automationName Method got failed take
+	 * screenshot using takesnap() method
+	 * 
 	 * @param url appium url
-	 * @return returns driver 
+	 * 
+	 * @return driver
 	 */
 
 	public AndroidDriver launchApp(String url) throws IOException {
@@ -59,40 +68,88 @@ public class BasePage implements baseMethods {
 			cap.setCapability("skipServerInstallation", "true");
 			cap.setCapability("automationName", "UiAutomator2");
 			cap.setCapability("clearDeviceLogsOnStart", true);
-			driver = new AndroidDriver(new URL(url),cap);
-			System.out.println("Session started.......");
-			System.out.println("Amazon app launched successfully");
-			driver.manage().timeouts().implicitlyWait(WAIT_MILLIS_100,TimeUnit.SECONDS);
+			driver = new AndroidDriver(new URL(url), cap);
+			driver.manage().timeouts().implicitlyWait(WAIT_MILLIS_100, TimeUnit.SECONDS);
 			tdriver.set(driver);
 		} catch (Exception e) {
 			throw new RuntimeException();
 
 		} finally {
 			takeSnap();
-		}  
+		}
 		return getDriver();
 
 	}
 
-	/* 
+	/*
 	 * Method returns driver
 	 */
 	public static synchronized AndroidDriver getDriver() {
 		return tdriver.get();
-
+	}
+	/*	
+	* @return returns ID, Name, linkText, PartialLinkText, tag, css, Xpath.
+	*/
+	public WebElement getMobileElement(String locator, String locValue) {
+		switch (locator) {
+		case "id":
+			return driver.findElementById(locValue);
+		case "name":
+			return driver.findElementByName(locValue);
+		case "className":
+			return driver.findElementByClassName(locValue);
+		case "link":
+			return driver.findElementByLinkText(locValue);
+		case "partialLink":
+			return driver.findElementByPartialLinkText(locValue);
+		case "tag":
+			return driver.findElementByTagName(locValue);
+		case "css":
+			return driver.findElementByCssSelector(locValue);
+		case "xpath":
+			return driver.findElementByXPath(locValue);
+		case "accessibilityId":
+			return driver.findElementByAccessibilityId(locValue);
+		case "image":
+			return driver.findElementByImage(locValue);
+		}
+		return null;
 	}
 
-	/* 
-	 * Actual locator "ID" to be used.
-	 * RuntimeException thrown when issue caught
+
+	public boolean enterValue(String locator, String locValue,String data ) {
+		try {
+			WebElement ele = getMobileElement(locator, locValue);
+			WebDriverWait wait = new WebDriverWait(driver, 30);
+			wait.until(ExpectedConditions.elementToBeClickable(ele));
+			ele.clear();
+			ele.sendKeys(data);
+		}	catch(Exception e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	public boolean click(String locator, String locValue) {
+		try {
+			WebElement ele = getMobileElement(locator, locValue);
+			WebDriverWait wait = new WebDriverWait(driver, 30);
+			wait.until(ExpectedConditions.elementToBeClickable(ele));
+			ele.click();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	/*
+	 * Actual locator "ID" to be used. RuntimeException thrown when issue caught
 	 */
+
 	public void clickByID(String ID) {
 		try {
-			driver.findElement(By.id(ID)).click();
-			System.out.println("Element of id "+ID+ " clicked successfully.");
+			getMobileElement("id",ID).click();
 
 		} catch (Exception E) {
-			System.err.println("Element of id "+ID+ " not clicked successfully.");
 			throw new RuntimeException();
 
 		} finally {
@@ -100,154 +157,94 @@ public class BasePage implements baseMethods {
 		}
 	}
 
-	/* 
-	 * Actual locator "xpath" to be used.
-	 * RuntimeException thrown when issue caught
+	/*
+	 * Actual locator "xpath" to be used. RuntimeException thrown when issue caught
 	 */
 
 	public void clickByXpath(String xpath) {
 		try {
-			driver.findElement(By.xpath(xpath)).click();
-			System.out.println("Element of "+xpath+ "clicked successfully");
+			getMobileElement("xpath",xpath).click();
 
 		} catch (Exception E) {
-			System.err.println("Element of "+xpath+ "is not clicked successfully");
 			throw new RuntimeException();
 
 		} finally {
 			takeSnap();
 
-		}  
+		}
 	}
 
-	/* 
-	 * Actual locator "ID" to be used.
-	 * actual Native element to be used to send input values
-	 * RuntimeException thrown when issue caught
+	/*
+	 * Actual locator "ID" to be used. actual Native element to be used to send
+	 * input values RuntimeException thrown when issue caught
 	 */
 
 	public void enterById(String id, String enterValue) {
 		try {
-			WebElement enterID= driver.findElement(By.id(id));
-			enterID.clear();
-			enterID.sendKeys(enterValue);
-			System.out.println("The text field with xpath " +id+ " entered with data" +enterValue+ "successfully");
-
+			enterValue("id",id,enterValue);
 		} catch (Exception e) {
-			System.err.println("The text field with xpath " +id+ " not entered with data"  +enterValue+ "successfully");	
 			throw new RuntimeException();
 
 		} finally {
 			takeSnap();
-		}  
+		}
 	}
 
-	/* 
-	 * Actual locator "xpath" to be used.
-	 * return the current locator
-	 * RuntimeException is thrown 
+	/*
+	 * Actual locator "xpath" to be used. return the current locator
+	 * RuntimeException is thrown
 	 */
 
-	public void enterByXpath(String xpath, String enterValue) {
+	public void enterByXpath(String xpath, String enterxpathValue) {
 		try {
-			WebElement enterXpath= driver.findElement(By.xpath(xpath));
-			enterXpath.clear();
-			enterXpath.sendKeys(enterValue);
-			System.out.println("The text field with xpath" +xpath+ " entered with data" +enterValue+ "successfully");
+			enterValue("xpath",xpath,enterxpathValue);
 
 		} catch (Exception e) {
-			System.err.println("The text field with xpath" +xpath+ " not entered with data"  +enterValue+ "successfully");	
 			throw new RuntimeException();
 
 		} finally {
 			takeSnap();
-		}  
+		}
 	}
-
-	/* 
-	 * waits for element to be clickable before timing out and throwing an exception
-	 * 
-	 * return the current locator
-	 */
-	public void waitAndclickByXpath(String xpath ) {
-		try {
-			WebDriverWait wait = new WebDriverWait(driver, 20);
-			WebElement elementXpath = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-			System.out.println("Element of " +xpath+ "is clicked successfully");
-
-		} catch (NoSuchElementException e) {
-			System.err.println("Element of " +xpath+ "is not clicked successfully.");
-			throw new RuntimeException();
-
-		} finally {
-			takeSnap();
-		}  
-	}
-
 
 	public void waitforLoad() throws InterruptedException	{
 		Thread.sleep(3000);
 	}
 
-	/* 
-	 *Gets the text from the matching element provided by the locator
+	/*
+	 * Gets the text from the matching element provided by the locator
 	 *
-	 *@return String the text of the element 
+	 * @return String the text of the element
 	 *
 	 */
-	public String getTextOfElement(String xpathOfGetValue)
-	{
-		String value = null ;
-		try
-		{
-			WebElement element= driver.findElement(By.xpath(xpathOfGetValue));
-			value=element.getText();
-			System.out.println(value);
+	public String getTextOfElement(WebElement ele) {
+		String value = null;
+		try {
 
-		}catch(Exception e) {
+			WebDriverWait wait = new WebDriverWait(driver, 30);
+			wait.until(ExpectedConditions.visibilityOf(ele));
+			return ele.getText();
 
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return value;
 	}
 
-	/* 
-	 *@param xpath, xpathdata to get element and input values
+	/*
+	 * Get orientation name
 	 *
-	 */
-
-	public void waitAndenterByXpath(String xpath,String xpathdata ) {
-		try {
-			WebDriverWait wait = new WebDriverWait(driver, 10);
-			WebElement eleName = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-			eleName.clear();
-			eleName.sendKeys(xpathdata);
-			System.out.println("The text field with xpath "+xpath+" entered with data "+xpathdata+" successfully.");
-
-		} catch (NoSuchElementException e) {
-			System.err.println("The text field with xpath "+xpathdata+" could not be found.");
-			throw new RuntimeException();
-
-		} finally {
-			takeSnap();
-		}  
-	}
-
-
-	/* 
-	 *Get orientation name
-	 *
-	 *@return String the text of the element 
+	 * @return String the text of the element
 	 *
 	 */
 
 	public String getOrientation() {
-		String value=driver.getOrientation().toString();
-		System.out.println(value);
+		String value = driver.getOrientation().toString();
 		return value;
 	}
 
-	/* 
-	 *@return Boolean true if the element is set to potrait screenOrientation
+	/*
+	 * @return Boolean true if the element is set to potrait screenOrientation
 	 *
 	 */
 	public boolean setPortraitOrientation() {
@@ -255,8 +252,8 @@ public class BasePage implements baseMethods {
 		return true;
 	}
 
-	/* 
-	 *@return Boolean true if the element is set to potrait screenOrientation
+	/*
+	 * @return Boolean true if the element is set to potrait screenOrientation
 	 *
 	 */
 	public boolean setLanscapeOrientation() {
@@ -264,24 +261,26 @@ public class BasePage implements baseMethods {
 		return true;
 	}
 
-	/* 
+	/*
 	 * Used to enter down from keyboard
 	 */
 	public void pageDownEnter() {
 		driver.getKeyboard().sendKeys(Keys.ARROW_DOWN);
-		driver.getKeyboard().sendKeys(Keys.RETURN);		
+		driver.getKeyboard().sendKeys(Keys.RETURN);
 
 	}
-	/* 
+
+	/*
 	 * Used to hide keyboard
 	 */
 	public void hideKeyboard() {
 		try {
 			driver.hideKeyboard();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 	}
 
-	/* 
+	/*
 	 * @param fingerTime to how many times user wants to swipe
 	 */
 
@@ -300,13 +299,13 @@ public class BasePage implements baseMethods {
 		driver.perform(Arrays.asList(sequence));
 	}
 
-	/* 
+	/*
 	 * Taking screenshot and stores in destfile defined here
 	 */
 
 	public void takeSnap() {
 		File src = driver.getScreenshotAs(OutputType.FILE);
-		File destFile = new File("./snaps/snap"+i+".jpg");
+		File destFile = new File("./snaps/snap" + i + ".jpg");
 		i++;
 		try {
 			FileUtils.copyFile(src, destFile);
@@ -315,40 +314,42 @@ public class BasePage implements baseMethods {
 		}
 	}
 
-	public void captureLogcat() { 
-		// inspect available log types 
-		Set<String> logtypes = driver.manage().logs().getAvailableLogTypes(); 
-		System.out.println("suported log types: " + logtypes.toString()); 
-		LogEntries logs = driver.manage().logs().get("logcat"); 
-		System.out.println("First and last ten lines of log: "); 
-		StreamSupport.stream(logs.spliterator(), false).limit(50).forEach(System.out::println); 
-		System.out.println("..."); 
-		StreamSupport.stream(logs.spliterator(), false).skip(logs.getAll().size() - 50).forEach(System.out::println); 
-		// wait for more logs 
-		try { 
-			Thread.sleep(5000); 
+
+
+
+	public void captureLogcat() {
+		// inspect available log types
+		Set<String> logtypes = driver.manage().logs().getAvailableLogTypes();
+		System.out.println("suported log types: " + logtypes.toString());
+		LogEntries logs = driver.manage().logs().get("logcat");
+		System.out.println("First and last ten lines of log: ");
+		StreamSupport.stream(logs.spliterator(), false).limit(50).forEach(System.out::println);
+		System.out.println("...");
+		StreamSupport.stream(logs.spliterator(), false).skip(logs.getAll().size() - 50).forEach(System.out::println);
+		// wait for more logs
+		try {
+			Thread.sleep(5000);
 		} catch (Exception ign) {
 
 		} // pause to allow visual verification
 		// demonstrate that each time get logs, we only get new logs
 		// which were generated since the last time we got logs
 		LogEntries secondCallToLogs = driver.manage().logs().get("logcat");
-		
-		System.out.println("\nFirst ten lines of next log call: "); 
-		StreamSupport.stream(secondCallToLogs.spliterator(), false).limit(10).forEach(System.out::println); 
+
+		System.out.println("\nFirst ten lines of next log call: ");
+		StreamSupport.stream(secondCallToLogs.spliterator(), false).limit(10).forEach(System.out::println);
 		Assert.assertNotEquals(logs.iterator().next(), secondCallToLogs.iterator().next());
-		
+
 	}
-	
-	public void captureAppiumLogs()	{
-				LogEntries entries = driver.manage().logs().get("server");
+
+	public void captureAppiumLogs() {
+		LogEntries entries = driver.manage().logs().get("server");
 		System.out.println("======== APPIUM SERVER LOGS ========");
 		for (LogEntry entry : entries) {
-		    System.out.println(new Date(entry.getTimestamp()) + " " + entry.getMessage());
+			System.out.println(new Date(entry.getTimestamp()) + " " + entry.getMessage());
 		}
 		System.out.println("================");
-	
-		}
 
-	
+	}
+
 }
