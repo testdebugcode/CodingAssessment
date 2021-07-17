@@ -1,11 +1,9 @@
 package pages;
 
 import java.io.IOException;
-
 import org.openqa.selenium.WebDriver;
 import com.mobile.testing.base.BasePage;
 import com.mobile.testing.base.ConfigFileReader;
-
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.qameta.allure.Step;
@@ -47,10 +45,10 @@ public class AmazonLoginPage extends BasePage {
 
 	}
 
-	@Step("Entering username into Username Text field") 
+	@Step("Entering passowrd into password Text field") 
 
 	public AmazonLoginPage typePassword(String password) {
-		waitAndenterByXpath("//android.widget.EditText[@resource-id='ap_password']",password);
+		enterByXpath("//android.widget.EditText[@resource-id='ap_password']",password);
 		return this;
 
 	}
@@ -69,8 +67,7 @@ public class AmazonLoginPage extends BasePage {
 		orientationValue=getOrientation();
 		if(orientationValue.equals("PORTRAIT")) {
 			setLanscapeOrientation();
-			System.out.println("Rotate to landscape mode successfully");
-		}
+			}
 	}
 
 	@Step("Roatating to Potrait mode if landscape mode is selected in Mobile Screen")
@@ -79,8 +76,7 @@ public class AmazonLoginPage extends BasePage {
 		orientationValue=getOrientation();
 		if(orientationValue.equals("LANDSCAPE")) {
 			setPortraitOrientation();
-			System.out.println("Rotate to potrait mode successfully");
-		}
+				}
 	}
 
 }
